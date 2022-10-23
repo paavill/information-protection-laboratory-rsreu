@@ -7,7 +7,10 @@ import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument("original", help="Original string", type=str)
+parser.add_argument("password", help="Password", type=str)
 parser.add_argument("--show-grid", help="Shows ganarated grid.", action="store_true")
+parser.add_argument("--show-original-sequence-to-grid", help="", action="store_true")
+parser.add_argument("--load-sequence-to-grid", help="", type=str)
 parser.add_argument("--encode", help="If exist original will be encode.", action="store_true")
 parser.add_argument("--decode", help="If exist original will be decode.", action="store_true")
 args = parser.parse_args()
@@ -17,13 +20,14 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 
-def generateGrid():
-    result = list(string.printable)
+def generateGrid(shuffle, sequence):
+    result = list(sequence)
     m = round(math.sqrt(len(result)))
-    return __generateGrid__(m, result)
+    return __generateGrid__(m, result, shuffle)
 
-def __generateGrid__(m, result):
-    random.shuffle(result)
+def __generateGrid__(m, result, shuffle):
+    if shuffle:    
+        random.shuffle(result)
     return list(chunks(result, m))
 
 def encode(original, grid):
@@ -64,15 +68,28 @@ def decode(original, grid):
 
 def main():
     start_time = datetime.now()
-    grid = generateGrid()
+    progonal_equence = ""
     encoded = 0
+
+    if args.load_sequence_to_grid != None:
+        progonal_equence = args.load_sequence_to_grid
+    else:
+        progonal_equence = string.printable
+
+    if args.show_original_sequence_to_grid:
+        print(progonal_equence)
+
+    grid = generateGrid(False, progonal_equence)
+
     if args.encode:
         encoded = encode(args.original, grid)
         encodedNp = np.array(encoded)
         encodedStr = "".join(encodedNp.flatten())
         print("Encoded string:\n" + encodedStr)
-    if args.decode:
+    if args.decode and args.encode:
         print("Decoded string:\n" + "".join(decode(encoded, grid)))
+    else:
+        print("Decoded string:\n" + "".join(decode(args.original, grid)))
     print("Delta: " + str(datetime.now() - start_time))
     if args.show_grid:
         print("")
