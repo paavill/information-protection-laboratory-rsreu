@@ -83,13 +83,22 @@ def main():
 
     if args.encode:
         encoded = encode(args.original, grid)
-        encodedNp = np.array(encoded)
-        encodedStr = "".join(encodedNp.flatten())
-        print("Encoded string:\n" + encodedStr)
+        encoded_password = encode(args.password, grid)
+        encoded_np = np.array(encoded)
+        encoded_np_password = np.array(encoded_password)
+        encoded_str = "".join(encoded_np.flatten()) + "".join(encoded_np_password.flatten())
+        print("Encoded string:\n" + encoded_str)
     if args.decode and args.encode:
         print("Decoded string:\n" + "".join(decode(encoded, grid)))
-    else:
-        print("Decoded string:\n" + "".join(decode(args.original, grid)))
+    elif args.decode:
+        password_part = args.original[(len(args.original) - len(args.password)):len(args.original)]
+        decoded_password = decode(password_part, grid)
+        decoded_password_str = "".join(decoded_password)
+        if decoded_password_str == args.password:
+            without_password_part = args.original[0:(len(args.original) - len(args.password))]
+            print("Decoded string:\n" + "".join(decode(without_password_part, grid)))
+        else:
+            print("Wrong password!")
     print("Delta: " + str(datetime.now() - start_time))
     if args.show_grid:
         print("")
