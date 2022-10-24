@@ -3,27 +3,40 @@ import kotlin.math.sqrt
 import kotlin.random.Random
 
 fun main(args: Array<String>) {
-    val original = "Hi?"
+    val original = "Codetest"
+    val password = "1234"
     val codePage =
         " !\"#\$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-    val grid = generateGrid(codePage)
+    val grid = generateGrid(false, codePage)
     val encoded = encode(original, grid)
-    println("Encoded: " + encoded.joinToString(""))
-    val decoded = decode(encoded, grid)
-    println("Decoded: " + decoded.joinToString(""))
+    val encodedPassword = encode(password, grid)
+    val encodedString = encoded.joinToString("") + encodedPassword.joinToString("")
+    println("Encoded: $encodedString")
+    val pass = encodedString.slice((encodedString.length - password.length) until encodedString.length)
+    val decodedPass = decode(pass.toList().map { it.toString() }, grid)
+    if (decodedPass.joinToString("") == password) {
+        val decoded = decode(encoded.slice(0 until (encodedString.length - password.length)), grid)
+        println("Decoded: " + decoded.joinToString(""))
+    } else {
+        println("Wrong password!")
+    }
 }
 
-fun generateGrid(codePage: String): List<List<String>> {
+fun generateGrid(shuffle: Boolean, codePage: String): List<List<String>> {
     val result = codePage.toList().map { it.toString() }.toMutableList()
     val width = sqrt(result.size.toDouble()).roundToInt()
     while (result.size % width != 0) {
         result.add(" ")
     }
-    return generateGrid(width, result)
+    return generateGrid(width, result, shuffle)
 }
 
-fun generateGrid(width: Int, charactersList: List<String>): List<List<String>> {
-    val shuffledList = charactersList.shuffled()
+fun generateGrid(width: Int, charactersList: List<String>, shuffle: Boolean): List<List<String>> {
+    val shuffledList = if (shuffle) {
+        charactersList.shuffled()
+    } else {
+        charactersList
+    }
     return shuffledList.chunked(width)
 }
 
